@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "bedrockdeathscreen",
+  "version": "${version}",
+  "name": "BedrockDeathScreen",
+  "description": "The bedrock death screen in Java Edition",
+  "authors": [
+    "Shiewk"
+  ],
+  "contact": {
+    "repo": "https://github.com/Shiewk/BedrockDeathScreen"
+  },
+  "license": "unlicense",
+  "icon": "assets/bedrockdeathscreen/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient"
+    ],
+    "main": [
+      "de.shiewk.bedrockdeathscreen.BedrockDeathScreen"
+    ]
+  },
+  "mixins": [
+    "bedrockdeathscreen.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

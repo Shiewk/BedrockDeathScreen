@@ -18,7 +18,7 @@
       "de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient"
     ],
     "main": [
-      "de.shiewk.bedrockdeathscreen.BedrockDeathScreen"
+      "de.shiewk.bedrockdeathscreen.BedrockDeathScreenMod"
     ]
   },
   "mixins": [

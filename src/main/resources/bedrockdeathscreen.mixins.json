@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "MixinClientPlayNetworkHandler"
+    "MixinCamera",
+    "MixinClientPlayNetworkHandler",
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

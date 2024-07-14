@@ -20,22 +20,18 @@ public abstract class MixinGameRenderer {
 
     @Shadow @Final MinecraftClient client;
 
-    @Shadow private float fovMultiplier;
-
-    @Shadow public abstract void tick();
-
     @Shadow protected abstract void renderHand(Camera camera, float tickDelta, Matrix4f matrix4f);
 
     @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
     public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir){
         if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            cir.setReturnValue((double) Math.min(60 + bedrockDeathScreen.getTotalDelta(client.getTickDelta()) / (405d), 80));
+            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalDelta(client.getRenderTickCounter().getTickDelta(true)) / (405d), 80));
         }
     }
 
     @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;update(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;ZZF)V"))
     public void onCameraUpdate(Camera instance, BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta){
-        if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
+        if (client.currentScreen instanceof BedrockDeathScreen){
             instance.update(area, focusedEntity, true, false, tickDelta);
         } else {
             instance.update(area, focusedEntity, thirdPerson, inverseView, tickDelta);

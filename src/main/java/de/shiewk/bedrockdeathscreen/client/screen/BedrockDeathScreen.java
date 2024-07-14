@@ -1,16 +1,13 @@
 package de.shiewk.bedrockdeathscreen.client.screen;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,8 +16,7 @@ import java.awt.*;
 public class BedrockDeathScreen extends DeathScreen {
 
     private int ticksSinceDeath = 0;
-    private Text scoreText = Text.empty();
-    private Text message;
+    private final Text message;
     private static final Text menuMessage = Text.translatable("deathScreen.titleScreen");
     private static final MutableText confirmQuitText = Text.translatable("deathScreen.quit.confirm");
     private Text respawnMessage;
@@ -59,7 +55,7 @@ public class BedrockDeathScreen extends DeathScreen {
                 mouseY < endY;
     }
 
-    private void renderRespawnButton(DrawContext context, int mouxeX, int mouseY, float delta, float opacity){
+    private void renderRespawnButton(DrawContext context, int mouxeX, int mouseY, float opacity){
         if ((int) opacity == 0){
             return;
         }
@@ -80,10 +76,10 @@ public class BedrockDeathScreen extends DeathScreen {
         context.fill(startX+1, endY, endX-1, endY+3, secondary);
         context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
 
-        context.drawCenteredTextWithShadow(textRenderer, respawnMessage, (int) (width/2), (int) (height - height/3), textColor);
+        context.drawCenteredTextWithShadow(textRenderer, respawnMessage, width/2, height - height/3 - 1, textColor);
     }
 
-    private void renderMenuButton(DrawContext context, int mouxeX, int mouseY, float delta, float opacity){
+    private void renderMenuButton(DrawContext context, int mouxeX, int mouseY, float opacity){
         if ((int) opacity == 0){
             return;
         }
@@ -105,18 +101,15 @@ public class BedrockDeathScreen extends DeathScreen {
         context.fill(startX+1, endY, endX-1, endY+3, secondary);
         context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
 
-        context.drawText(textRenderer, menuMessage, (int) (width/2) - (textRenderer.getWidth(menuMessage)/2), (int) (height - height/3 - 1 + 31), textColor, false);
+        context.drawText(textRenderer, menuMessage, (width/2) - (textRenderer.getWidth(menuMessage)/2), height - height/3 - 1 + 31, textColor, false);
     }
 
-    private void renderConfirmRespawnButton(DrawContext context, int mouxeX, int mouseY, float delta, float opacity){
-        if ((int) opacity == 0){
-            return;
-        }
-        final int primary = new Color(60, 133, 39, (int) opacity).getRGB();
-        final int secondary = new Color(29, 77, 19, (int) opacity).getRGB();
-        final int gaccent = new Color(79, 145, 60, (int) opacity).getRGB();
-        final int black = new Color(0, 0, 0, (int) opacity).getRGB();
-        final int textColor = new Color(255, 255, 255, (int) opacity).getRGB();
+    private void renderConfirmRespawnButton(DrawContext context, int mouxeX, int mouseY){
+        final int primary = new Color(60, 133, 39, (int) (float) 255.0).getRGB();
+        final int secondary = new Color(29, 77, 19, (int) (float) 255.0).getRGB();
+        final int gaccent = new Color(79, 145, 60, (int) (float) 255.0).getRGB();
+        final int black = new Color(0, 0, 0, (int) (float) 255.0).getRGB();
+        final int textColor = new Color(255, 255, 255, (int) (float) 255.0).getRGB();
         final boolean mouseHover = hoversMenuButton(mouxeX, mouseY);
 
         final int startX = width/2 - 75;
@@ -129,10 +122,10 @@ public class BedrockDeathScreen extends DeathScreen {
         context.fill(startX+1, endY, endX-1, endY+3, secondary);
         context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
 
-        context.drawText(textRenderer, respawnMessage, (int) (width/2) - (textRenderer.getWidth(respawnMessage)/2), (int) (height - height/3 - 1 + 30), textColor, false);
+        context.drawText(textRenderer, respawnMessage, (width/2) - (textRenderer.getWidth(respawnMessage)/2), height - height/3 - 1 + 30, textColor, false);
     }
 
-    private void renderConfirmQuitButton(DrawContext context, int mouxeX, int mouseY, float delta){
+    private void renderConfirmQuitButton(DrawContext context, int mouxeX, int mouseY){
         final int primary = new Color(208, 209, 212, (int) (float) 255.0).getRGB();
         final int secondary = new Color(88, 88, 90, (int) (float) 255.0).getRGB();
         final int buttonAccent = new Color(177, 178, 181, (int) (float) 255.0).getRGB();
@@ -151,7 +144,7 @@ public class BedrockDeathScreen extends DeathScreen {
         context.fill(startX+1, endY, endX-1, endY+3, secondary);
         context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
 
-        context.drawText(textRenderer, menuMessage, (int) (width/2) - (textRenderer.getWidth(menuMessage)/2), (int) (height - height/3), textColor, false);
+        context.drawText(textRenderer, menuMessage, (width/2) - (textRenderer.getWidth(menuMessage)/2), height - height/3 - 1, textColor, false);
     }
 
     public float getTotalDelta(float delta){
@@ -170,7 +163,7 @@ public class BedrockDeathScreen extends DeathScreen {
             if (textOpacity > 0){
                 context.getMatrices().push();
                 context.getMatrices().scale(2F, 2F, 2F);
-                context.drawCenteredTextWithShadow(this.textRenderer, this.title, (int) (this.width / 2 / 2), (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
+                context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
                 context.getMatrices().pop();
                 context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
             }
@@ -178,16 +171,16 @@ public class BedrockDeathScreen extends DeathScreen {
         if (!confirmingExit){
             if (totalDelta > 1250f){
                 float respawnOpacity = (int) Math.min(255, (totalDelta - 1250f) / 3f);
-                renderRespawnButton(context, mouseX, mouseY, delta, respawnOpacity);
+                renderRespawnButton(context, mouseX, mouseY, respawnOpacity);
             }
             if (totalDelta > 1750f){
                 float menuOpacity = (int) Math.min(255, (totalDelta - 1750f) / 3f);
-                renderMenuButton(context, mouseX, mouseY, delta, menuOpacity);
+                renderMenuButton(context, mouseX, mouseY, menuOpacity);
             }
         } else {
-            context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, (int) (this.height - this.height / 3 - 9 - 12), new Color(255, 255, 255, 255).getRGB());
-            renderConfirmRespawnButton(context, mouseX, mouseY, delta, 255f);
-            renderConfirmQuitButton(context, mouseX, mouseY, delta);
+            context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 9 - 12, new Color(255, 255, 255, 255).getRGB());
+            renderConfirmRespawnButton(context, mouseX, mouseY);
+            renderConfirmQuitButton(context, mouseX, mouseY);
         }
 
     }
@@ -195,7 +188,6 @@ public class BedrockDeathScreen extends DeathScreen {
     @Override
     protected void init() {
         this.respawnMessage = this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn");
-        this.scoreText = Text.translatable("deathScreen.score.value", new Object[]{Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW)});
     }
 
     @Override
@@ -206,12 +198,18 @@ public class BedrockDeathScreen extends DeathScreen {
 
     private void respawn(){
         ticksSinceDeath = 0;
-        this.client.player.requestRespawn();
+        if (this.client != null && this.client.player != null) {
+            this.client.player.requestRespawn();
+        }
         playUISound();
     }
 
     private void playUISound() {
-        this.client.player.playSoundToPlayer(SoundEvent.of(SOUND), SoundCategory.MASTER, 1f, 1f);
+        if (this.client != null) {
+            if (this.client.player != null) {
+                this.client.player.playSoundToPlayer(SoundEvent.of(SOUND), SoundCategory.MASTER, .75f, 1f);
+            }
+        }
     }
 
     @Override
@@ -237,29 +235,12 @@ public class BedrockDeathScreen extends DeathScreen {
     }
 
     private void quitLevel(){
-        if (this.client.world != null) {
+        if (this.client != null && this.client.world != null) {
             this.client.world.disconnect();
         }
-
-        this.client.disconnect(new MessageScreen(Text.translatable("menu.savingLevel")));
-        this.client.setScreen(new TitleScreen());
-    }
-
-    private void onTitleScreenButtonClicked(){
-        if (this.hardcore) {
-            this.quitLevel();
-        } else {
-            final MutableText titleScreenText = Text.translatable("deathScreen.titleScreen");
-            ConfirmScreen confirmScreen = new TitleScreenConfirmScreen((confirmed) -> {
-                if (confirmed) {
-                    this.quitLevel();
-                } else {
-                    respawn();
-                }
-
-            }, confirmQuitText, ScreenTexts.EMPTY, titleScreenText, Text.translatable("deathScreen.respawn"));
-            this.client.setScreen(confirmScreen);
-            confirmScreen.disableButtons(20);
+        if (this.client != null) {
+            this.client.disconnect(new MessageScreen(Text.translatable("menu.savingLevel")));
+            this.client.setScreen(new TitleScreen());
         }
     }
 

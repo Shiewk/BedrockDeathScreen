@@ -5,7 +5,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -14,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(Camera.class)
 public class MixinCamera {
 
-    @Shadow private float lastTickDelta;
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getYaw(F)F"))
     public float onYawGet(Entity instance, float tickDelta){
@@ -38,7 +36,7 @@ public class MixinCamera {
     public float onUpdateThirdPerson(float constant){
         final MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            final float delta = client.getTickDelta();
+            final float delta = client.getRenderTickCounter().getTickDelta(true);
             return bedrockDeathScreen.calcCameraOffset(delta);
         } else {
             return 4.0f;

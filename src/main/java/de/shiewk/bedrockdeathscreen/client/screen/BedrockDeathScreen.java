@@ -8,6 +8,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,7 @@ public class BedrockDeathScreen extends DeathScreen {
 
     private int ticksSinceDeath = 0;
     private final Text message;
+    private Text scoreText = Text.empty();
     private static final Text menuMessage = Text.translatable("deathScreen.titleScreen");
     private static final MutableText confirmQuitText = Text.translatable("deathScreen.quit.confirm");
     private Text respawnMessage;
@@ -167,6 +169,10 @@ public class BedrockDeathScreen extends DeathScreen {
                 context.getMatrices().pop();
                 context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
             }
+            final int scoreTextOpacity = (int) Math.min(255, (totalDelta - 1250f) / 3f);
+            if (scoreTextOpacity > 0){
+                context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
+            }
         }
         if (!confirmingExit){
             if (totalDelta > 1250f){
@@ -188,6 +194,9 @@ public class BedrockDeathScreen extends DeathScreen {
     @Override
     protected void init() {
         this.respawnMessage = this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn");
+        if (this.client != null && this.client.player != null) {
+            this.scoreText = Text.translatable("deathScreen.score.value", Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW));
+        }
     }
 
     @Override

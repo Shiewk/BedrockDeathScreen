@@ -25,7 +25,7 @@ public abstract class MixinGameRenderer {
     @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
     public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir){
         if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalDelta(client.getRenderTickCounter().getTickDelta(true)) / (405d), 80));
+            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalDelta() / (405d), 80));
         }
     }
 

@@ -18,14 +18,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
 
-    @Shadow @Final MinecraftClient client;
+    @Shadow @Final private MinecraftClient client;
 
     @Shadow protected abstract void renderHand(Camera camera, float tickDelta, Matrix4f matrix4f);
 
     @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
-    public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir){
+    public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir){
         if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalDelta() / (405d), 80));
+            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalDelta() / (405f), 80));
         }
     }
 

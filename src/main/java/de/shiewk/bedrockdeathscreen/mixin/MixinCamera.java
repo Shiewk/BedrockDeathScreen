@@ -36,8 +36,7 @@ public class MixinCamera {
     public float onUpdateThirdPerson(float constant){
         final MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            final float delta = client.getRenderTickCounter().getTickDelta(true);
-            return bedrockDeathScreen.calcCameraOffset(delta);
+            return bedrockDeathScreen.calcCameraOffset();
         } else {
             return 4.0f;
         }

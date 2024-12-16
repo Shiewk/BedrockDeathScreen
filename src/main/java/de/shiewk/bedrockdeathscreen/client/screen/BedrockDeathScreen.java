@@ -17,8 +17,7 @@ import java.awt.*;
 
 public class BedrockDeathScreen extends DeathScreen {
 
-    private int ticksSinceDeath = 0;
-    private long screenTime = 0;
+    private final long screenCreationTime;
     private final Text message;
     private Text scoreText = Text.empty();
     private static final Text menuMessage = Text.translatable("deathScreen.titleScreen");
@@ -33,7 +32,7 @@ public class BedrockDeathScreen extends DeathScreen {
         super(message, isHardcore);
         this.message = message;
         this.hardcore = isHardcore;
-        screenTime = Util.getMeasuringTimeNano();
+        screenCreationTime = Util.getMeasuringTimeNano();
     }
 
     private boolean hoversRespawn(int mouseX, int mouseY){
@@ -41,7 +40,7 @@ public class BedrockDeathScreen extends DeathScreen {
         int startY = height - height / 3 - 9;
         int endX = width/2 + 75;
         int endY = height - height / 3 + 13;
-        return getTotalDelta() > 1050 &&
+        return getTotalScreenTime() > 1050 &&
                 mouseX > startX &&
                 mouseX < endX &&
                 mouseY > startY &&
@@ -53,7 +52,7 @@ public class BedrockDeathScreen extends DeathScreen {
         final int startY = height - height / 3 - 9 + 30;
         final int endX = width/2 + 75;
         final int endY = height - height / 3 + 13 + 30;
-        return getTotalDelta() > 1050 &&
+        return getTotalScreenTime() > 1050 &&
                 mouseX > startX &&
                 mouseX < endX &&
                 mouseY > startY &&
@@ -152,13 +151,13 @@ public class BedrockDeathScreen extends DeathScreen {
         context.drawText(textRenderer, menuMessage, (width/2) - (textRenderer.getWidth(menuMessage)/2), height - height/3 - 1, textColor, false);
     }
 
-    public float getTotalDelta(){
-        return (Util.getMeasuringTimeNano() - screenTime) / 1000000f;
+    public float getTotalScreenTime(){
+        return (Util.getMeasuringTimeNano() - screenCreationTime) / 1000000f;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        final float totalDelta = getTotalDelta();
+        final float totalDelta = getTotalScreenTime();
         context.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalDelta/4f)).getRGB());
         if (totalDelta > 750.0f){
             final int backOpacity = (int) Math.min(255, (totalDelta - 750f) / 10f);
@@ -202,14 +201,7 @@ public class BedrockDeathScreen extends DeathScreen {
         }
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        ticksSinceDeath++;
-    }
-
     private void respawn(){
-        ticksSinceDeath = 0;
         if (this.client != null && this.client.player != null) {
             this.client.player.requestRespawn();
         }
@@ -264,9 +256,9 @@ public class BedrockDeathScreen extends DeathScreen {
         return deg < 180 ? deg : deg-360;
     }
 
-    public float calcCameraOffset(float delta){
+    public float calcCameraOffset(){
         final double e = Math.E;
-        final double del = getTotalDelta() / 600d;
+        final double del = getTotalScreenTime() / 600d;
         final double ep = Math.pow(e, del);
         return (float) (ep / (1d + ep) * 7d + 2d);
     }

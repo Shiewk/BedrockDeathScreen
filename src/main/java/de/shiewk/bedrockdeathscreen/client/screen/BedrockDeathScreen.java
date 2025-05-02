@@ -12,10 +12,13 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
 public class BedrockDeathScreen extends DeathScreen {
+
+    public static final long CURSOR_HAND = GLFW.glfwCreateStandardCursor(GLFW.GLFW_POINTING_HAND_CURSOR);
 
     private final long screenCreationTime;
     private final Text message;
@@ -27,6 +30,7 @@ public class BedrockDeathScreen extends DeathScreen {
     private final Identifier SOUND = Identifier.of("minecraft", "ui.button.click");
     private final int deg = (int) (Math.random() * 360);
     private boolean confirmingExit = false;
+    private boolean wasHoveringButtons = false;
 
     public BedrockDeathScreen(@Nullable Text message, boolean isHardcore) {
         super(message, isHardcore);
@@ -157,32 +161,44 @@ public class BedrockDeathScreen extends DeathScreen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        final float totalDelta = getTotalScreenTime();
-        context.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalDelta/4f)).getRGB());
-        if (totalDelta > 750.0f){
-            final int backOpacity = (int) Math.min(255, (totalDelta - 750f) / 10f);
+        boolean hoveringButton = hoversMenuButton(mouseX, mouseY) || hoversRespawn(mouseX, mouseY);
+        if (hoveringButton != wasHoveringButtons){
+            wasHoveringButtons = hoveringButton;
+            assert client != null;
+            long window = client.getWindow().getHandle();
+            if (hoveringButton){
+                GLFW.glfwSetCursor(window, CURSOR_HAND);
+            } else {
+                GLFW.glfwSetCursor(window, 0);
+            }
+        }
+
+        final float totalScreenTime = getTotalScreenTime();
+        context.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalScreenTime/4f)).getRGB());
+        if (totalScreenTime > 750.0f){
+            final int backOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 10f);
             context.fill(0, 0, width, height, new Color(155, 0, 0, (int) (backOpacity/2.5)).getRGB());
 
-            final int textOpacity = (int) Math.min(255, (totalDelta - 750f) / 3f);
-            if (textOpacity > 0){
+            final int textOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 3f);
+            if (textOpacity > 3){
                 context.getMatrices().push();
                 context.getMatrices().scale(2F, 2F, 2F);
                 context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
                 context.getMatrices().pop();
                 context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
             }
-            final int scoreTextOpacity = (int) Math.min(255, (totalDelta - 1250f) / 3f);
-            if (scoreTextOpacity > 0){
+            final int scoreTextOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
+            if (scoreTextOpacity > 3){
                 context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
             }
         }
         if (!confirmingExit){
-            if (totalDelta > 1250f){
-                float respawnOpacity = (int) Math.min(255, (totalDelta - 1250f) / 3f);
+            if (totalScreenTime > 1259f){
+                float respawnOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
                 renderRespawnButton(context, mouseX, mouseY, respawnOpacity);
             }
-            if (totalDelta > 1750f){
-                float menuOpacity = (int) Math.min(255, (totalDelta - 1750f) / 3f);
+            if (totalScreenTime > 1759f){
+                float menuOpacity = (int) Math.min(255, (totalScreenTime - 1750f) / 3f);
                 renderMenuButton(context, mouseX, mouseY, menuOpacity);
             }
         } else {
@@ -261,5 +277,21 @@ public class BedrockDeathScreen extends DeathScreen {
         final double del = getTotalScreenTime() / 600d;
         final double ep = Math.pow(e, del);
         return (float) (ep / (1d + ep) * 7d + 2d);
+    }
+
+    @Override
+    public void close() {
+        assert client != null;
+        long window = client.getWindow().getHandle();
+        GLFW.glfwSetCursor(window, 0);
+        super.close();
+    }
+
+    @Override
+    public void removed() {
+        assert client != null;
+        long window = client.getWindow().getHandle();
+        GLFW.glfwSetCursor(window, 0);
+        super.removed();
     }
 }

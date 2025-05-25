@@ -23,8 +23,11 @@ public class MixinMinecraftClient {
             argsOnly = true
     )
     public Screen onCreateDeathScreen(Screen value){
-        assert world != null; // Always true
-        return new BedrockDeathScreen(null, world.getLevelProperties().isHardcore());
+        if (world != null){
+            return new BedrockDeathScreen(null, world.getLevelProperties().isHardcore());
+        } else {
+            return value;
+        }
     }
 
 }

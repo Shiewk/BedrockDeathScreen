@@ -1,15 +1,13 @@
 package de.shiewk.bedrockdeathscreen.client.screen;
 
+import de.shiewk.bedrockdeathscreen.client.screen.components.BedrockDeathScreenButton;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -25,12 +23,13 @@ public class BedrockDeathScreen extends DeathScreen {
     private Text scoreText = Text.empty();
     private static final Text menuMessage = Text.translatable("deathScreen.titleScreen");
     private static final MutableText confirmQuitText = Text.translatable("deathScreen.quit.confirm");
-    private Text respawnMessage;
     private final boolean hardcore;
-    private final Identifier SOUND = Identifier.of("minecraft", "ui.button.click");
     private final int deg = (int) (Math.random() * 360);
     private boolean confirmingExit = false;
     private boolean wasHoveringButtons = false;
+
+    private BedrockDeathScreenButton respawnButton;
+    private BedrockDeathScreenButton menuButton;
 
     public BedrockDeathScreen(@Nullable Text message, boolean isHardcore) {
         super(message, isHardcore);
@@ -39,142 +38,16 @@ public class BedrockDeathScreen extends DeathScreen {
         screenCreationTime = Util.getMeasuringTimeNano();
     }
 
-    private boolean hoversRespawn(int mouseX, int mouseY){
-        int startX = width/2 - 75;
-        int startY = height - height / 3 - 9;
-        int endX = width/2 + 75;
-        int endY = height - height / 3 + 13;
-        return getTotalScreenTime() > 1050 &&
-                mouseX > startX &&
-                mouseX < endX &&
-                mouseY > startY &&
-                mouseY < endY;
-    }
-
-    private boolean hoversMenuButton(int mouseX, int mouseY){
-        final int startX = width/2 - 75;
-        final int startY = height - height / 3 - 9 + 30;
-        final int endX = width/2 + 75;
-        final int endY = height - height / 3 + 13 + 30;
-        return getTotalScreenTime() > 1050 &&
-                mouseX > startX &&
-                mouseX < endX &&
-                mouseY > startY &&
-                mouseY < endY;
-    }
-
-    private void renderRespawnButton(DrawContext context, int mouxeX, int mouseY, float opacity){
-        if ((int) opacity == 0){
-            return;
-        }
-        final int primary = new Color(60, 133, 39, (int) opacity).getRGB();
-        final int secondary = new Color(29, 77, 19, (int) opacity).getRGB();
-        final int gaccent = new Color(79, 145, 60, (int) opacity).getRGB();
-        final int black = new Color(0, 0, 0, (int) opacity).getRGB();
-        final int textColor = new Color(255, 255, 255, (int) opacity).getRGB();
-        final boolean mouseHover = hoversRespawn(mouxeX, mouseY);
-
-        final int startX = width/2 - 75;
-        final int startY = height - height / 3 - 9;
-        final int endX = width/2 + 75;
-        final int endY = height - height / 3 + 13;
-
-        context.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? secondary : primary));
-        context.drawBorder(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), gaccent);
-        context.fill(startX+1, endY, endX-1, endY+3, secondary);
-        context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
-
-        context.drawCenteredTextWithShadow(textRenderer, respawnMessage, width/2, height - height/3 - 1, textColor);
-    }
-
-    private void renderMenuButton(DrawContext context, int mouxeX, int mouseY, float opacity){
-        if ((int) opacity == 0){
-            return;
-        }
-        final int primary = new Color(208, 209, 212, (int) opacity).getRGB();
-        final int secondary = new Color(88, 88, 90, (int) opacity).getRGB();
-        final int buttonAccent = new Color(177, 178, 181, (int) opacity).getRGB();
-        final int gaccent = new Color(227, 227, 229, (int) opacity).getRGB();
-        final int black = new Color(0, 0, 0, (int) opacity).getRGB();
-        final int textColor = new Color(30, 30, 30, (int) opacity).getRGB();
-        final boolean mouseHover = hoversMenuButton(mouxeX, mouseY);
-
-        final int startX = width/2 - 75;
-        final int startY = height - height / 3 - 9 + 30;
-        final int endX = width/2 + 75;
-        final int endY = height - height / 3 + 13 + 30;
-
-        context.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? buttonAccent : primary));
-        context.drawBorder(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), gaccent);
-        context.fill(startX+1, endY, endX-1, endY+3, secondary);
-        context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
-
-        context.drawText(textRenderer, menuMessage, (width/2) - (textRenderer.getWidth(menuMessage)/2), height - height/3 - 1 + 31, textColor, false);
-    }
-
-    private void renderConfirmRespawnButton(DrawContext context, int mouxeX, int mouseY){
-        final int primary = new Color(60, 133, 39, (int) (float) 255.0).getRGB();
-        final int secondary = new Color(29, 77, 19, (int) (float) 255.0).getRGB();
-        final int gaccent = new Color(79, 145, 60, (int) (float) 255.0).getRGB();
-        final int black = new Color(0, 0, 0, (int) (float) 255.0).getRGB();
-        final int textColor = new Color(255, 255, 255, (int) (float) 255.0).getRGB();
-        final boolean mouseHover = hoversMenuButton(mouxeX, mouseY);
-
-        final int startX = width/2 - 75;
-        final int startY = height - height / 3 - 9 + 30;
-        final int endX = width/2 + 75;
-        final int endY = height - height / 3 + 13 + 30;
-
-        context.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? secondary : primary));
-        context.drawBorder(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), gaccent);
-        context.fill(startX+1, endY, endX-1, endY+3, secondary);
-        context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
-
-        context.drawText(textRenderer, respawnMessage, (width/2) - (textRenderer.getWidth(respawnMessage)/2), height - height/3 - 1 + 30, textColor, false);
-    }
-
-    private void renderConfirmQuitButton(DrawContext context, int mouxeX, int mouseY){
-        final int primary = new Color(208, 209, 212, (int) (float) 255.0).getRGB();
-        final int secondary = new Color(88, 88, 90, (int) (float) 255.0).getRGB();
-        final int buttonAccent = new Color(177, 178, 181, (int) (float) 255.0).getRGB();
-        final int gaccent = new Color(227, 227, 229, (int) (float) 255.0).getRGB();
-        final int black = new Color(0, 0, 0, (int) (float) 255.0).getRGB();
-        final int textColor = new Color(30, 30, 30, (int) (float) 255.0).getRGB();
-        final boolean mouseHover = hoversRespawn(mouxeX, mouseY);
-
-        final int startX = width/2 - 75;
-        final int startY = height - height / 3 - 9;
-        final int endX = width/2 + 75;
-        final int endY = height - height / 3 + 13;
-
-        context.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? buttonAccent : primary));
-        context.drawBorder(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), gaccent);
-        context.fill(startX+1, endY, endX-1, endY+3, secondary);
-        context.drawBorder(startX, startY, (endX) - (startX), (endY+4) - (startY), black);
-
-        context.drawText(textRenderer, menuMessage, (width/2) - (textRenderer.getWidth(menuMessage)/2), height - height/3 - 1, textColor, false);
-    }
-
     public float getTotalScreenTime(){
         return (Util.getMeasuringTimeNano() - screenCreationTime) / 1000000f;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        boolean hoveringButton = hoversMenuButton(mouseX, mouseY) || hoversRespawn(mouseX, mouseY);
-        if (hoveringButton != wasHoveringButtons){
-            wasHoveringButtons = hoveringButton;
-            assert client != null;
-            long window = client.getWindow().getHandle();
-            if (hoveringButton){
-                GLFW.glfwSetCursor(window, CURSOR_HAND);
-            } else {
-                GLFW.glfwSetCursor(window, 0);
-            }
-        }
 
         final float totalScreenTime = getTotalScreenTime();
         context.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalScreenTime/4f)).getRGB());
+
         if (totalScreenTime > 750.0f){
             final int backOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 10f);
             context.fill(0, 0, width, height, new Color(155, 0, 0, (int) (backOpacity/2.5)).getRGB());
@@ -194,66 +67,88 @@ public class BedrockDeathScreen extends DeathScreen {
                 context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
             }
         }
-        if (!confirmingExit){
-            if (totalScreenTime > 1259f){
-                float respawnOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
-                renderRespawnButton(context, mouseX, mouseY, respawnOpacity);
-            }
-            if (totalScreenTime > 1759f){
-                float menuOpacity = (int) Math.min(255, (totalScreenTime - 1750f) / 3f);
-                renderMenuButton(context, mouseX, mouseY, menuOpacity);
-            }
-        } else {
+
+        if (confirmingExit){
             context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 9 - 12, new Color(255, 255, 255, 255).getRGB());
-            renderConfirmRespawnButton(context, mouseX, mouseY);
-            renderConfirmQuitButton(context, mouseX, mouseY);
+        }
+        respawnButton.render(context, mouseX, mouseY, delta);
+        menuButton.render(context, mouseX, mouseY, delta);
+
+        boolean hoveringButton = menuButton.isHovered() || respawnButton.isHovered();
+        if (hoveringButton != wasHoveringButtons){
+            wasHoveringButtons = hoveringButton;
+            assert client != null;
+            long window = client.getWindow().getHandle();
+            if (hoveringButton){
+                GLFW.glfwSetCursor(window, CURSOR_HAND);
+            } else {
+                GLFW.glfwSetCursor(window, 0);
+            }
         }
 
     }
 
     @Override
     protected void init() {
-        this.respawnMessage = this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn");
+        Text respawnMessage = this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn");
         if (this.client != null && this.client.player != null) {
             this.scoreText = Text.translatable("deathScreen.score.value", Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW));
         }
+        respawnButton = new BedrockDeathScreenButton(
+                width / 2 - 75,
+                height - height / 3 - 9,
+                150,
+                22,
+                respawnMessage,
+                textRenderer,
+                0x3c8527,
+                0x1d4d13,
+                0x4f913c,
+                0x1d4d13,
+                0xffffff,
+                0x1d4d13,
+                0x4a7142,
+                true,
+                () -> (int) Math.min(255, (getTotalScreenTime() - 1250f) / 3f),
+                this::respawn
+        );
+        menuButton = new BedrockDeathScreenButton(
+                width / 2 - 75,
+                height - height / 3 + 21,
+                150,
+                22,
+                menuMessage,
+                textRenderer,
+                0xd0d1d4,
+                0x58585a,
+                0xe3e3e5,
+                0xb1b2b5,
+                0x1e1e1e,
+                0xb1b2b5,
+                0xe0e0e1,
+                false,
+                () -> (int) Math.min(255, (getTotalScreenTime() - 1750f) / 3f),
+                this::clickQuitButton
+        );
     }
 
     private void respawn(){
         if (this.client != null && this.client.player != null) {
             this.client.player.requestRespawn();
         }
-        playUISound();
-    }
-
-    private void playUISound() {
-        if (this.client != null) {
-            if (this.client.player != null) {
-                this.client.player.playSoundToPlayer(SoundEvent.of(SOUND), SoundCategory.MASTER, .75f, 1f);
-            }
-        }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (hoversRespawn((int) mouseX, (int) mouseY)){
-            if (!confirmingExit){
-                respawn();
-            } else {
-                playUISound();
-                quitLevel();
-            }
-            return true;
-        } else if (hoversMenuButton((int) mouseX, (int) mouseY)){
-            if (!confirmingExit){
-                playUISound();
-                this.confirmingExit = true;
-            } else {
-                respawn();
-            }
-            return true;
-        }
-        return false;
+        if (respawnButton.mouseClicked(mouseX, mouseY, button)) return true;
+        return menuButton.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        respawnButton.mouseReleased(mouseX, mouseY, button);
+        menuButton.mouseReleased(mouseX, mouseY, button);
+        return true;
     }
 
     private void quitLevel(){
@@ -295,5 +190,19 @@ public class BedrockDeathScreen extends DeathScreen {
         long window = client.getWindow().getHandle();
         GLFW.glfwSetCursor(window, 0);
         super.removed();
+    }
+
+    private void clickQuitButton() {
+        if (confirmingExit) {
+            this.quitLevel();
+        } else {
+            confirmingExit = true;
+            int y = menuButton.getY();
+            menuButton.setY(respawnButton.getY());
+            respawnButton.setY(y);
+
+            menuButton.resetClickedState();
+            respawnButton.resetClickedState();
+        }
     }
 }

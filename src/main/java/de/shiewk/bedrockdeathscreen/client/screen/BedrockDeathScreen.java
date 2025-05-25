@@ -185,7 +185,9 @@ public class BedrockDeathScreen extends DeathScreen {
                 context.getMatrices().scale(2F, 2F, 2F);
                 context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
                 context.getMatrices().pop();
-                context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
+                if (message != null) {
+                    context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
+                }
             }
             final int scoreTextOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
             if (scoreTextOpacity > 3){

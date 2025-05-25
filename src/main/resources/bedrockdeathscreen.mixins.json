@@ -8,7 +8,8 @@
   "client": [
     "MixinCamera",
     "MixinClientPlayNetworkHandler",
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "MixinMinecraftClient"
   ],
   "injectors": {
     "defaultRequire": 1

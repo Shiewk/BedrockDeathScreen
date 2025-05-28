@@ -85,7 +85,7 @@ public class BedrockDeathScreen extends DeathScreen {
         }
 
         if (confirmingExit){
-            context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 9 - 12, new Color(255, 255, 255, 255).getRGB());
+            context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 24, new Color(255, 255, 255, 255).getRGB());
         }
         respawnButton.render(context, mouseX, mouseY, delta);
         menuButton.render(context, mouseX, mouseY, delta);

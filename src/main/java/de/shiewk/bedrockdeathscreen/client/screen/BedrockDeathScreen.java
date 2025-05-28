@@ -5,9 +5,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -17,6 +19,7 @@ import java.awt.*;
 public class BedrockDeathScreen extends DeathScreen {
 
     public static final long CURSOR_HAND = GLFW.glfwCreateStandardCursor(GLFW.GLFW_POINTING_HAND_CURSOR);
+    public static final Identifier VIGNETTE = Identifier.of("bedrockdeathscreen", "textures/gui/death_vignette.png");
 
     private final long screenCreationTime;
     private final Text message;
@@ -50,7 +53,20 @@ public class BedrockDeathScreen extends DeathScreen {
 
         if (totalScreenTime > 750.0f){
             final int backOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 10f);
-            context.fill(0, 0, width, height, new Color(155, 0, 0, (int) (backOpacity/2.5)).getRGB());
+            context.drawTexture(
+                    RenderLayer::getGuiTextured,
+                    VIGNETTE,
+                    0,
+                    0,
+                    0.0F,
+                    0.0F,
+                    context.getScaledWindowWidth(),
+                    context.getScaledWindowHeight(),
+                    context.getScaledWindowWidth(),
+                    context.getScaledWindowHeight(),
+                    0xffffff + (backOpacity << 24)
+            );
+            context.fill(0, 0, width, height, new Color(50, 0, 0, (int) (backOpacity/2.5)).getRGB());
 
             final int textOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 3f);
             if (textOpacity > 3){

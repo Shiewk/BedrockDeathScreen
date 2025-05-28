@@ -7,4 +7,8 @@ a lot like the Bedrock Edition death screen.
 
 Modded death screen:
 
-![Modded death screen image](https://github.com/user-attachments/assets/a573e79b-139c-4caf-b1d9-1b5f639376ff)
+![Modded death screen image](https://github.com/user-attachments/assets/f29f4d04-4d66-4200-8fba-6d07d6e5d6de)
+
+## Config
+This mod supports **Mod Menu**.
+If you are not using it, you can manually edit the config in **config/bedrockdeathscreen.json**.

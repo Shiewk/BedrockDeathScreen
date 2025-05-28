@@ -19,6 +19,9 @@
     ],
     "main": [
       "de.shiewk.bedrockdeathscreen.BedrockDeathScreenMod"
+    ],
+    "modmenu": [
+      "de.shiewk.bedrockdeathscreen.config.ModMenuConfig"
     ]
   },
   "mixins": [

@@ -1,6 +1,8 @@
 package de.shiewk.bedrockdeathscreen.client.screen;
 
+import de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient;
 import de.shiewk.bedrockdeathscreen.client.screen.components.BedrockDeathScreenButton;
+import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
@@ -21,6 +23,7 @@ public class BedrockDeathScreen extends DeathScreen {
     public static final long CURSOR_HAND = GLFW.glfwCreateStandardCursor(GLFW.GLFW_POINTING_HAND_CURSOR);
     public static final Identifier VIGNETTE = Identifier.of("bedrockdeathscreen", "textures/gui/death_vignette.png");
 
+    private final BedrockDeathScreenConfig config;
     private final long screenCreationTime;
     private final Text message;
     private Text scoreText = Text.empty();
@@ -36,6 +39,7 @@ public class BedrockDeathScreen extends DeathScreen {
 
     public BedrockDeathScreen(@Nullable Text message, boolean isHardcore) {
         super(message, isHardcore);
+        this.config = BedrockDeathScreenClient.getConfig();
         this.message = message;
         this.hardcore = isHardcore;
         screenCreationTime = Util.getMeasuringTimeNano();
@@ -78,9 +82,11 @@ public class BedrockDeathScreen extends DeathScreen {
                     context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
                 }
             }
-            final int scoreTextOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
-            if (scoreTextOpacity > 3){
-                context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
+            if (config.showScore){
+                final int scoreTextOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
+                if (scoreTextOpacity > 3){
+                    context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
+                }
             }
         }
 

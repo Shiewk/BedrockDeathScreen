@@ -20,7 +20,7 @@ public abstract class MixinGameRenderer {
 
     @Shadow @Final private MinecraftClient client;
 
-    @Shadow protected abstract void renderHand(Camera camera, float tickDelta, Matrix4f matrix4f);
+    @Shadow protected abstract void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix);
 
     @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
     public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir){
@@ -38,10 +38,10 @@ public abstract class MixinGameRenderer {
         }
     }
 
-    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderHand(Lnet/minecraft/client/render/Camera;FLorg/joml/Matrix4f;)V"))
-    public void onCameraUpdate(GameRenderer instance, Camera camera, float tickDelta, Matrix4f matrix4f){
+    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderHand(FZLorg/joml/Matrix4f;)V"))
+    public void onCameraUpdate(GameRenderer instance, float tickProgress, boolean sleeping, Matrix4f positionMatrix){
         if (!(instance.getClient().currentScreen instanceof BedrockDeathScreen)){
-            renderHand(camera, tickDelta, matrix4f);
+            renderHand(tickProgress, sleeping, positionMatrix);
         }
     }
 }

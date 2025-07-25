@@ -3,17 +3,18 @@ package de.shiewk.bedrockdeathscreen.client.screen;
 import de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient;
 import de.shiewk.bedrockdeathscreen.client.screen.components.BedrockDeathScreenButton;
 import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -58,7 +59,7 @@ public class BedrockDeathScreen extends DeathScreen {
         if (totalScreenTime > 750.0f){
             final int backOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 10f);
             context.drawTexture(
-                    RenderLayer::getGuiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     VIGNETTE,
                     0,
                     0,
@@ -74,10 +75,10 @@ public class BedrockDeathScreen extends DeathScreen {
 
             final int textOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 3f);
             if (textOpacity > 3){
-                context.getMatrices().push();
-                context.getMatrices().scale(2F, 2F, 2F);
+                Matrix3x2fStack stack = context.getMatrices().pushMatrix();
+                stack.scale(2F, 2F, stack);
                 context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
-                context.getMatrices().pop();
+                stack.popMatrix();
                 if (message != null) {
                     context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
                 }
@@ -173,16 +174,6 @@ public class BedrockDeathScreen extends DeathScreen {
         return true;
     }
 
-    private void quitLevel(){
-        if (this.client != null && this.client.world != null) {
-            this.client.world.disconnect();
-        }
-        if (this.client != null) {
-            this.client.disconnect(new MessageScreen(Text.translatable("menu.savingLevel")));
-            this.client.setScreen(new TitleScreen());
-        }
-    }
-
     public float calcCamPitch() {
         return 20;
     }
@@ -216,7 +207,7 @@ public class BedrockDeathScreen extends DeathScreen {
 
     private void clickQuitButton() {
         if (confirmingExit) {
-            this.quitLevel();
+            quitLevel();
         } else {
             confirmingExit = true;
             int y = menuButton.getY();
@@ -226,5 +217,15 @@ public class BedrockDeathScreen extends DeathScreen {
             menuButton.resetClickedState();
             respawnButton.resetClickedState();
         }
+    }
+
+    private void quitLevel() {
+        assert this.client != null;
+        if (this.client.world != null) {
+            this.client.world.disconnect(ClientWorld.QUITTING_MULTIPLAYER_TEXT);
+        }
+
+        this.client.disconnectWithSavingScreen();
+        this.client.setScreen(new TitleScreen());
     }
 }

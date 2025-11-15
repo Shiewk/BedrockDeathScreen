@@ -4,6 +4,7 @@ import de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient;
 import de.shiewk.bedrockdeathscreen.client.screen.components.BedrockDeathScreenButton;
 import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -15,13 +16,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
 public class BedrockDeathScreen extends DeathScreen {
 
-    public static final long CURSOR_HAND = GLFW.glfwCreateStandardCursor(GLFW.GLFW_POINTING_HAND_CURSOR);
     public static final Identifier VIGNETTE = Identifier.of("bedrockdeathscreen", "textures/gui/death_vignette.png");
 
     private final BedrockDeathScreenConfig config;
@@ -100,13 +99,6 @@ public class BedrockDeathScreen extends DeathScreen {
         boolean hoveringButton = menuButton.isHovered() || respawnButton.isHovered();
         if (hoveringButton != wasHoveringButtons){
             wasHoveringButtons = hoveringButton;
-            assert client != null;
-            long window = client.getWindow().getHandle();
-            if (hoveringButton){
-                GLFW.glfwSetCursor(window, CURSOR_HAND);
-            } else {
-                GLFW.glfwSetCursor(window, 0);
-            }
         }
 
     }
@@ -162,15 +154,15 @@ public class BedrockDeathScreen extends DeathScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (respawnButton.mouseClicked(mouseX, mouseY, button)) return true;
-        return menuButton.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (respawnButton.mouseClicked(click, doubled)) return true;
+        return menuButton.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        respawnButton.mouseReleased(mouseX, mouseY, button);
-        menuButton.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(Click click) {
+        respawnButton.mouseReleased(click);
+        menuButton.mouseReleased(click);
         return true;
     }
 
@@ -187,22 +179,6 @@ public class BedrockDeathScreen extends DeathScreen {
         final double del = getTotalScreenTime() / 600d;
         final double ep = Math.pow(e, del);
         return (float) (ep / (1d + ep) * 7d + 2d);
-    }
-
-    @Override
-    public void close() {
-        assert client != null;
-        long window = client.getWindow().getHandle();
-        GLFW.glfwSetCursor(window, 0);
-        super.close();
-    }
-
-    @Override
-    public void removed() {
-        assert client != null;
-        long window = client.getWindow().getHandle();
-        GLFW.glfwSetCursor(window, 0);
-        super.removed();
     }
 
     private void clickQuitButton() {

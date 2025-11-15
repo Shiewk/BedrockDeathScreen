@@ -2,32 +2,28 @@ package de.shiewk.bedrockdeathscreen.mixin;
 
 import de.shiewk.bedrockdeathscreen.client.screen.BedrockDeathScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {
 
-    @Shadow @Nullable public ClientWorld world;
+    @Shadow
+    @Nullable
+    public ClientWorld world;
 
-    @ModifyVariable(
+    @Redirect(
             method = "setScreen",
-            at = @At("STORE"),
-            name = "screen",
-            index = 1,
-            argsOnly = true
+            at = @At(value = "NEW", target = "(Lnet/minecraft/text/Text;Z)Lnet/minecraft/client/gui/screen/DeathScreen;")
     )
-    public Screen onCreateDeathScreen(Screen value){
-        if (world != null){
-            return new BedrockDeathScreen(null, world.getLevelProperties().isHardcore());
-        } else {
-            return value;
-        }
+    public DeathScreen bedrockdeathscreen$createModifiedDeathScreen(Text message, boolean isHardcore){
+        return new BedrockDeathScreen(null, world != null && world.getLevelProperties().isHardcore());
     }
 
 }

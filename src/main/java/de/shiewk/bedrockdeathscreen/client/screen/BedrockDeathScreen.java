@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -37,8 +38,8 @@ public class BedrockDeathScreen extends DeathScreen {
     private BedrockDeathScreenButton respawnButton;
     private BedrockDeathScreenButton menuButton;
 
-    public BedrockDeathScreen(@Nullable Text message, boolean isHardcore) {
-        super(message, isHardcore);
+    public BedrockDeathScreen(@Nullable Text message, boolean isHardcore, ClientPlayerEntity decedent) {
+        super(message, isHardcore, decedent);
         this.config = BedrockDeathScreenClient.getConfig();
         this.message = message;
         this.hardcore = isHardcore;

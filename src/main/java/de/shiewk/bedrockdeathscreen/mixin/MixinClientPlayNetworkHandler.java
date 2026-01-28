@@ -3,7 +3,6 @@ package de.shiewk.bedrockdeathscreen.mixin;
 import de.shiewk.bedrockdeathscreen.client.screen.BedrockDeathScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;

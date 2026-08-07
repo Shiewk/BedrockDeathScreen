@@ -3,33 +3,34 @@ package de.shiewk.bedrockdeathscreen.client.screen;
 import de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient;
 import de.shiewk.bedrockdeathscreen.client.screen.components.BedrockDeathScreenButton;
 import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 
 public class BedrockDeathScreen extends DeathScreen {
 
-    public static final Identifier VIGNETTE = Identifier.of("bedrockdeathscreen", "textures/gui/death_vignette.png");
+    public static final Identifier VIGNETTE = Identifier.fromNamespaceAndPath("bedrockdeathscreen", "textures/gui/death_vignette.png");
 
     private final BedrockDeathScreenConfig config;
     private final long screenCreationTime;
-    private final Text message;
-    private Text scoreText = Text.empty();
-    private static final Text menuMessage = Text.translatable("deathScreen.titleScreen");
-    private static final MutableText confirmQuitText = Text.translatable("deathScreen.quit.confirm");
+    private final Component message;
+    private Component scoreText = Component.empty();
+    private static final Component menuMessage = Component.translatable("deathScreen.titleScreen");
+    private static final MutableComponent confirmQuitText = Component.translatable("deathScreen.quit.confirm");
     private final boolean hardcore;
     private final int deg = (int) (Math.random() * 360);
     private boolean confirmingExit = false;
@@ -38,64 +39,64 @@ public class BedrockDeathScreen extends DeathScreen {
     private BedrockDeathScreenButton respawnButton;
     private BedrockDeathScreenButton menuButton;
 
-    public BedrockDeathScreen(@Nullable Text message, boolean isHardcore, ClientPlayerEntity decedent) {
+    public BedrockDeathScreen(@Nullable Component message, boolean isHardcore, LocalPlayer decedent) {
         super(message, isHardcore, decedent);
         this.config = BedrockDeathScreenClient.getConfig();
         this.message = message;
         this.hardcore = isHardcore;
-        screenCreationTime = Util.getMeasuringTimeNano();
+        screenCreationTime = Util.getNanos();
     }
 
     public float getTotalScreenTime(){
-        return (Util.getMeasuringTimeNano() - screenCreationTime) / 1000000f;
+        return (Util.getNanos() - screenCreationTime) / 1000000f;
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 
         final float totalScreenTime = getTotalScreenTime();
-        context.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalScreenTime/4f)).getRGB());
+        graphics.fill(0, 0, width, height, new Color(0, 0, 0, (int) Math.min(80, totalScreenTime/4f)).getRGB());
 
         if (totalScreenTime > 750.0f){
             final int backOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 10f);
-            context.drawTexture(
+            graphics.blit(
                     RenderPipelines.GUI_TEXTURED,
                     VIGNETTE,
                     0,
                     0,
                     0.0F,
                     0.0F,
-                    context.getScaledWindowWidth(),
-                    context.getScaledWindowHeight(),
-                    context.getScaledWindowWidth(),
-                    context.getScaledWindowHeight(),
+                    graphics.guiWidth(),
+                    graphics.guiHeight(),
+                    graphics.guiWidth(),
+                    graphics.guiHeight(),
                     0xffffff + (backOpacity << 24)
             );
-            context.fill(0, 0, width, height, new Color(50, 0, 0, (int) (backOpacity/2.5)).getRGB());
+            graphics.fill(0, 0, width, height, new Color(50, 0, 0, (int) (backOpacity/2.5)).getRGB());
 
             final int textOpacity = (int) Math.min(255, (totalScreenTime - 750f) / 3f);
             if (textOpacity > 3){
-                Matrix3x2fStack stack = context.getMatrices().pushMatrix();
+                Matrix3x2fStack stack = graphics.pose().pushMatrix();
                 stack.scale(2F, 2F, stack);
-                context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
+                graphics.centeredText(this.font, this.title, this.width / 2 / 2, (int) (this.height / 3.5 / 2 - 10), new Color(255, 255, 255, textOpacity).getRGB());
                 stack.popMatrix();
                 if (message != null) {
-                    context.drawCenteredTextWithShadow(this.textRenderer, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
+                    graphics.centeredText(this.font, this.message, this.width / 2, (int) (this.height / 3.5), new Color(255, 255, 255, textOpacity).getRGB());
                 }
             }
             if (config.showScore){
                 final int scoreTextOpacity = (int) Math.min(255, (totalScreenTime - 1250f) / 3f);
                 if (scoreTextOpacity > 3){
-                    context.drawCenteredTextWithShadow(this.textRenderer, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
+                    graphics.centeredText(this.font, this.scoreText, this.width / 2, (int) (this.height / 3.5) + 12, new Color(255, 255, 255, scoreTextOpacity).getRGB());
                 }
             }
         }
 
         if (confirmingExit){
-            context.drawCenteredTextWithShadow(this.textRenderer, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 24, new Color(255, 255, 255, 255).getRGB());
+            graphics.centeredText(this.font, BedrockDeathScreen.confirmQuitText, this.width / 2, this.height - this.height / 3 - 24, new Color(255, 255, 255, 255).getRGB());
         }
-        respawnButton.render(context, mouseX, mouseY, delta);
-        menuButton.render(context, mouseX, mouseY, delta);
+        respawnButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        menuButton.extractRenderState(graphics, mouseX, mouseY, delta);
 
         boolean hoveringButton = menuButton.isHovered() || respawnButton.isHovered();
         if (hoveringButton != wasHoveringButtons){
@@ -106,9 +107,13 @@ public class BedrockDeathScreen extends DeathScreen {
 
     @Override
     protected void init() {
-        Text respawnMessage = this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn");
-        if (this.client != null && this.client.player != null) {
-            this.scoreText = Text.translatable("deathScreen.score.value", Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW));
+        Component respawnMessage = this.hardcore ? Component.translatable("deathScreen.spectate") : Component.translatable("deathScreen.respawn");
+        if (this.minecraft.player != null) {
+            this.scoreText = Component.translatable(
+                    "deathScreen.score.value",
+                    Component.literal(Integer.toString(this.minecraft.player.getScore()))
+                            .withStyle(ChatFormatting.YELLOW)
+            );
         }
         respawnButton = new BedrockDeathScreenButton(
                 width / 2 - 75,
@@ -116,7 +121,7 @@ public class BedrockDeathScreen extends DeathScreen {
                 150,
                 22,
                 respawnMessage,
-                textRenderer,
+                font,
                 0x3c8527,
                 0x1d4d13,
                 0x4f913c,
@@ -134,7 +139,7 @@ public class BedrockDeathScreen extends DeathScreen {
                 150,
                 22,
                 menuMessage,
-                textRenderer,
+                font,
                 0xd0d1d4,
                 0x58585a,
                 0xe3e3e5,
@@ -149,21 +154,21 @@ public class BedrockDeathScreen extends DeathScreen {
     }
 
     private void respawn(){
-        if (this.client != null && this.client.player != null) {
-            this.client.player.requestRespawn();
+        if (this.minecraft.player != null) {
+            this.minecraft.player.respawn();
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        if (respawnButton.mouseClicked(click, doubled)) return true;
-        return menuButton.mouseClicked(click, doubled);
+    public boolean mouseClicked(@NonNull MouseButtonEvent ev, boolean doubled) {
+        if (respawnButton.mouseClicked(ev, doubled)) return true;
+        return menuButton.mouseClicked(ev, doubled);
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
-        respawnButton.mouseReleased(click);
-        menuButton.mouseReleased(click);
+    public boolean mouseReleased(@NonNull MouseButtonEvent ev) {
+        respawnButton.mouseReleased(ev);
+        menuButton.mouseReleased(ev);
         return true;
     }
 
@@ -179,7 +184,7 @@ public class BedrockDeathScreen extends DeathScreen {
         final double e = Math.E;
         final double del = getTotalScreenTime() / 600d;
         final double ep = Math.pow(e, del);
-        return (float) (ep / (1d + ep) * 7d + 2d);
+        return (float) (ep / (1d + ep) * 1.75d + 0.5d);
     }
 
     private void clickQuitButton() {
@@ -197,12 +202,11 @@ public class BedrockDeathScreen extends DeathScreen {
     }
 
     private void quitLevel() {
-        assert this.client != null;
-        if (this.client.world != null) {
-            this.client.world.disconnect(ClientWorld.QUITTING_MULTIPLAYER_TEXT);
+        if (this.minecraft.level != null) {
+            this.minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         }
 
-        this.client.disconnectWithSavingScreen();
-        this.client.setScreen(new TitleScreen());
+        this.minecraft.disconnectWithSavingScreen();
+        this.minecraft.setScreen(new TitleScreen());
     }
 }

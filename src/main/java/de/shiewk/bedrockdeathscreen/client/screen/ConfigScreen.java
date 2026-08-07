@@ -2,12 +2,12 @@ package de.shiewk.bedrockdeathscreen.client.screen;
 
 import de.shiewk.bedrockdeathscreen.client.BedrockDeathScreenClient;
 import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.GridWidget;
-import net.minecraft.client.gui.widget.SimplePositioningWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
 
@@ -18,27 +18,27 @@ public final class ConfigScreen extends Screen {
     private boolean configChanged = false;
 
     public ConfigScreen(Screen parent) {
-        super(Text.empty());
+        super(Component.empty());
         this.parent = parent;
     }
 
     @Override
     protected void init() {
-        addDrawableChild(new TextWidget(
+        addWidget(new StringWidget(
                 0, 5, width, 9,
-                Text.translatable("bedrockdeathscreen.config"),
-                textRenderer
+                Component.translatable("bedrockdeathscreen.config"),
+                font
         ));
-        addDrawableChild(new ButtonWidget.Builder(
-                Text.translatable("gui.done"),
-                button -> this.close()
-        ).position(width / 2 - 75, this.height - 25).build());
+        addWidget(new Button.Builder(
+                Component.translatable("gui.done"),
+                _ -> this.onClose()
+        ).pos(width / 2 - 75, this.height - 25).build());
 
-        GridWidget grid = new GridWidget();
-        grid.getMainPositioner().margin(4, 4, 4, 4);
-        final GridWidget.Adder adder = grid.createAdder(2);
+        GridLayout grid = new GridLayout();
+        grid.defaultCellSetting().padding(4, 4, 4, 4);
+        final GridLayout.RowHelper adder = grid.createRowHelper(2);
 
-        adder.add(createButton(
+        adder.addChild(createButton(
                 "bedrockdeathscreen.config.showScore",
                 config.showScore,
                 button -> {
@@ -48,27 +48,27 @@ public final class ConfigScreen extends Screen {
                 }
         ));
 
-        grid.refreshPositions();
-        SimplePositioningWidget.setPos(grid, 0, 0, this.width, this.height, 0.5F, 0.5F);
-        grid.forEachChild(this::addDrawableChild);
+        grid.arrangeElements();
+        FrameLayout.alignInRectangle(grid, 0, 0, this.width, this.height, 0.5F, 0.5F);
+        grid.visitWidgets(this::addWidget);
     }
 
-    private Text getButtonText(String translation, boolean state) {
-        return Text.translatable(
+    private Component getButtonText(String translation, boolean state) {
+        return Component.translatable(
                 translation,
-                state ? Text.translatable("gui.yes") : Text.translatable("gui.no")
+                state ? Component.translatable("gui.yes") : Component.translatable("gui.no")
         ).withColor(state ? 0x00ff00 : 0xff5555);
     }
 
-    private ButtonWidget createButton(String translation, boolean state, ButtonWidget.PressAction action) {
-        return ButtonWidget.builder(
+    private Button createButton(String translation, boolean state, Button.OnPress action) {
+        return Button.builder(
                 getButtonText(translation, state),
                 action
         ).build();
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         if (configChanged){
             try {
                 BedrockDeathScreenClient.saveConfig();
@@ -76,7 +76,6 @@ public final class ConfigScreen extends Screen {
                 throw new RuntimeException(e);
             }
         }
-        assert client != null;
-        client.setScreen(parent);
+        minecraft.setScreen(parent);
     }
 }

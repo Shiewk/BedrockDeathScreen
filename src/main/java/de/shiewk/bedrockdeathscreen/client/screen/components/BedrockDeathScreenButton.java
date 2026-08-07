@@ -1,20 +1,21 @@
 package de.shiewk.bedrockdeathscreen.client.screen.components;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.cursor.StandardCursors;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.IntSupplier;
 
-public class BedrockDeathScreenButton extends ClickableWidget {
+public class BedrockDeathScreenButton extends AbstractWidget {
 
     public static final int colorBlack = 0x000000;
-    public final TextRenderer textRenderer;
+    public final Font font;
     public final int colorPrimary;
     public final int colorSecondary;
     public final int colorBorder;
@@ -31,14 +32,14 @@ public class BedrockDeathScreenButton extends ClickableWidget {
 
     public BedrockDeathScreenButton(
             int x, int y, int width, int height,
-            Text message, TextRenderer textRenderer,
+            Component message, Font font,
             int colorPrimary, int colorSecondary,
             int colorBorder, int colorHover,
             int colorText, int colorPrimaryPressed, int colorBorderPressed, boolean textShadow,
             IntSupplier opacitySupplier, Runnable clickAction
     ) {
         super(x, y, width, height, message);
-        this.textRenderer = textRenderer;
+        this.font = font;
         this.colorPrimary = colorPrimary;
         this.colorSecondary = colorSecondary;
         this.colorBorder = colorBorder;
@@ -56,11 +57,11 @@ public class BedrockDeathScreenButton extends ClickableWidget {
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    protected void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         final boolean mouseHover = isHovered();
 
         if (mouseHover) {
-            context.setCursor(StandardCursors.POINTING_HAND);
+            graphics.requestCursor(CursorTypes.POINTING_HAND);
         }
 
         final int opacity = getOpacity();
@@ -72,29 +73,29 @@ public class BedrockDeathScreenButton extends ClickableWidget {
 
         boolean shouldAppearPressed = pressed || clicked;
         if (shouldAppearPressed){
-            context.fill(startX+2, startY+4, endX-2, endY+2, changeColorOpacity(colorPrimaryPressed, opacity));
-            context.drawStrokedRectangle(startX+1, startY+3, (endX-1) - (startX+1), (endY+1) - (startY+1), changeColorOpacity(colorBorderPressed, opacity));
-            context.drawStrokedRectangle(startX, startY+2, endX - startX, (endY+2) - startY, changeColorOpacity(colorBlack, opacity));
+            graphics.fill(startX+2, startY+4, endX-2, endY+2, changeColorOpacity(colorPrimaryPressed, opacity));
+            graphics.outline(startX+1, startY+3, (endX-1) - (startX+1), (endY+1) - (startY+1), changeColorOpacity(colorBorderPressed, opacity));
+            graphics.outline(startX, startY+2, endX - startX, (endY+2) - startY, changeColorOpacity(colorBlack, opacity));
         } else {
-            context.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? changeColorOpacity(colorHover, opacity) : changeColorOpacity(colorPrimary, opacity)));
-            context.drawStrokedRectangle(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), changeColorOpacity(colorBorder, opacity));
-            context.fill(startX+1, endY, endX-1, endY+3, changeColorOpacity(colorSecondary, opacity));
-            context.drawStrokedRectangle(startX, startY, endX - startX, (endY+4) - startY, changeColorOpacity(colorBlack, opacity));
+            graphics.fill(startX+2, startY+2, endX-2, endY-1, (mouseHover ? changeColorOpacity(colorHover, opacity) : changeColorOpacity(colorPrimary, opacity)));
+            graphics.outline(startX+1, startY+1, (endX-1) - (startX+1), (endY) - (startY+1), changeColorOpacity(colorBorder, opacity));
+            graphics.fill(startX+1, endY, endX-1, endY+3, changeColorOpacity(colorSecondary, opacity));
+            graphics.outline(startX, startY, endX - startX, (endY+4) - startY, changeColorOpacity(colorBlack, opacity));
         }
 
         if (textShadow){
-            context.drawCenteredTextWithShadow(
-                    textRenderer,
+            graphics.centeredText(
+                    font,
                     getMessage(),
                     startX+getWidth()/2,
                     endY - getHeight()/2 - (shouldAppearPressed ? 1 : 3),
                     changeColorOpacity(colorText, opacity)
             );
         } else {
-            context.drawText(
-                    textRenderer,
+            graphics.text(
+                    font,
                     getMessage(),
-                    startX + (getWidth()/2) - (textRenderer.getWidth(getMessage())/2),
+                    startX + (getWidth()/2) - (font.width(getMessage())/2),
                     endY - getHeight()/2 - (shouldAppearPressed ? 1 : 3),
                     changeColorOpacity(colorText, opacity),
                     false
@@ -103,13 +104,13 @@ public class BedrockDeathScreenButton extends ClickableWidget {
     }
 
     @Override
-    public void onClick(Click click, boolean doubled) {
+    public void onClick(@NonNull MouseButtonEvent click, boolean doubled) {
         pressed = true;
     }
 
     @Override
-    public void onRelease(Click click) {
-        if (pressed && hovered) {
+    public void onRelease(@NonNull MouseButtonEvent click) {
+        if (pressed && isHovered) {
             clicked = true;
             clickAction.run();
         }
@@ -117,15 +118,12 @@ public class BedrockDeathScreenButton extends ClickableWidget {
     }
 
     @Override
-    public void playDownSound(SoundManager soundManager) {
+    public void playDownSound(@NonNull SoundManager soundManager) {
         if (!clicked) super.playDownSound(soundManager);
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
-
-    @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
         if (getOpacity() > 0){
             return super.mouseClicked(click, doubled);
         } else {
@@ -144,5 +142,10 @@ public class BedrockDeathScreenButton extends ClickableWidget {
     @Override
     public boolean isHovered() {
         return super.isHovered() && getOpacity() > 0;
+    }
+
+    @Override
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput output) {
+
     }
 }

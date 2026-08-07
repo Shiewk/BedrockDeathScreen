@@ -3,7 +3,7 @@ package de.shiewk.bedrockdeathscreen.client;
 import com.google.gson.Gson;
 import de.shiewk.bedrockdeathscreen.config.BedrockDeathScreenConfig;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +23,8 @@ public final class BedrockDeathScreenClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        configPath = minecraftClient.runDirectory.toPath().resolve("config/bedrockdeathscreen.json");
+        Minecraft client = Minecraft.getInstance();
+        configPath = client.gameDirectory.toPath().resolve("config/bedrockdeathscreen.json");
 
         try {
             loadConfig();

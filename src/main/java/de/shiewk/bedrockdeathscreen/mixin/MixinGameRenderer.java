@@ -1,36 +1,26 @@
 package de.shiewk.bedrockdeathscreen.mixin;
 
 import de.shiewk.bedrockdeathscreen.client.screen.BedrockDeathScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import org.joml.Matrix4f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    protected abstract void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix);
 
-    @Shadow protected abstract void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix);
-
-    @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
-    public void onFovGet(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir){
-        if (client.currentScreen instanceof BedrockDeathScreen bedrockDeathScreen){
-            cir.setReturnValue(Math.min(60 + bedrockDeathScreen.getTotalScreenTime() / (405f), 80));
-        }
-    }
-
-    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderHand(FZLorg/joml/Matrix4f;)V"))
-    public void onCameraUpdate(GameRenderer instance, float tickProgress, boolean sleeping, Matrix4f positionMatrix){
-        if (!(instance.getClient().currentScreen instanceof BedrockDeathScreen)){
-            renderHand(tickProgress, sleeping, positionMatrix);
+    @Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;FLorg/joml/Matrix4fc;)V"))
+    public void onCameraUpdate(GameRenderer instance, CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix){
+        if (!(instance.getMinecraft().screen instanceof BedrockDeathScreen)){
+            renderItemInHand(cameraState, deltaPartialTick, modelViewMatrix);
         }
     }
 }

@@ -1,30 +1,30 @@
 package de.shiewk.bedrockdeathscreen.mixin;
 
 import de.shiewk.bedrockdeathscreen.client.screen.BedrockDeathScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public class MixinMinecraftClient {
 
     @Shadow
     @Nullable
-    public ClientWorld world;
+    public ClientLevel level;
 
     @Redirect(
             method = "setScreen",
-            at = @At(value = "NEW", target = "(Lnet/minecraft/text/Text;ZLnet/minecraft/client/network/ClientPlayerEntity;)Lnet/minecraft/client/gui/screen/DeathScreen;")
+            at = @At(value = "NEW", target = "(Lnet/minecraft/network/chat/Component;ZLnet/minecraft/client/player/LocalPlayer;)Lnet/minecraft/client/gui/screens/DeathScreen;")
     )
-    public DeathScreen bedrockdeathscreen$createModifiedDeathScreen(Text message, boolean isHardcore, ClientPlayerEntity decedent){
-        return new BedrockDeathScreen(null, world != null && world.getLevelProperties().isHardcore(), decedent);
+    public DeathScreen bedrockdeathscreen$createModifiedDeathScreen(Component causeOfDeath, boolean hardcore, LocalPlayer player){
+        return new BedrockDeathScreen(causeOfDeath, level != null && level.getLevelData().isHardcore(), player);
     }
 
 }

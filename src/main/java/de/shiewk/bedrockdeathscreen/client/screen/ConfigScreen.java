@@ -76,6 +76,6 @@ public final class ConfigScreen extends Screen {
                 throw new RuntimeException(e);
             }
         }
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 }

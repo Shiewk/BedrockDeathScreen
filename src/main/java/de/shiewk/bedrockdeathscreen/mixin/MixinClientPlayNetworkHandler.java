@@ -16,9 +16,9 @@ public abstract class MixinClientPlayNetworkHandler {
 
     @Shadow private ClientLevel level;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"), method = "handlePlayerCombatKill", cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"), method = "handlePlayerCombatKill", cancellable = true)
     private void onDeathScreenShow(ClientboundPlayerCombatKillPacket packet, CallbackInfo ci){
-        Minecraft.getInstance().setScreen(new BedrockDeathScreen(packet.message(), this.level.getLevelData().isHardcore(), Minecraft.getInstance().player));
+        Minecraft.getInstance().gui.setScreen(new BedrockDeathScreen(packet.message(), this.level.getLevelData().isHardcore(), Minecraft.getInstance().player));
         ci.cancel();
     }
 }

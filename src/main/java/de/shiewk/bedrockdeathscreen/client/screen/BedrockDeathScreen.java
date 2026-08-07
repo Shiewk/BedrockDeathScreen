@@ -207,6 +207,6 @@ public class BedrockDeathScreen extends DeathScreen {
         }
 
         this.minecraft.disconnectWithSavingScreen();
-        this.minecraft.setScreen(new TitleScreen());
+        this.minecraft.gui.setScreen(new TitleScreen());
     }
 }
